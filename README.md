@@ -6,8 +6,14 @@ DynamoDB as the data store.
 
 ## Status
 
-Step 1 of 4 — runnable skeleton with a health check. Coming next: the assortment
-endpoint, the Lambda adapter, and DynamoDB.
+Step 2 of 4 — assortment endpoint backed by an in-memory repository. Coming next:
+the Lambda adapter, then DynamoDB.
+
+## Endpoints
+
+- `GET /health` — liveness probe
+- `GET /products` — full assortment (called on app load)
+- `GET /products/{product_id}` — single product (404 if unknown)
 
 ## Requirements
 
