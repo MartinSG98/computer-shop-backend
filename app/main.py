@@ -1,6 +1,7 @@
 """Computer Shop API entry point."""
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
 from app.models import CategoryOut, ProductOut
@@ -13,7 +14,14 @@ from app.repository import (
 
 app = FastAPI(
     title="Computer Shop API",
-    version="0.3.0",
+    version="0.4.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().cors_allow_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

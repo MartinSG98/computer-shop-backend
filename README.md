@@ -6,9 +6,10 @@ DynamoDB as the data store.
 
 ## Status
 
-v0.3 — assortment API with categories. Runs locally with zero setup, deploys to
-AWS Lambda behind API Gateway, reads from DynamoDB when configured, serves product
-images via S3 + CloudFront, and supports a category taxonomy with filtering.
+v0.4 — assortment API with categories and CORS enabled for a browser frontend.
+Runs locally with zero setup, deploys to AWS Lambda behind API Gateway, reads from
+DynamoDB when configured, serves product images via S3 + CloudFront, and supports
+a category taxonomy with filtering.
 
 ## Data store
 
@@ -22,6 +23,7 @@ The repository implementation is chosen at runtime from the environment:
 | `AWS_REGION` | AWS region (set automatically on Lambda). |
 | `DYNAMODB_ENDPOINT_URL` | Optional override, e.g. DynamoDB Local. |
 | `CDN_BASE_URL` | CloudFront base URL for images (see below). |
+| `CORS_ALLOW_ORIGINS` | Comma-separated allowed origins (see below). |
 
 Products and categories are independent: set both env vars for a fully
 DynamoDB-backed app, or neither to run entirely on in-memory seed data.
@@ -68,6 +70,17 @@ Filter products with `GET /products?category=<slug>`:
 
 Filtering is currently done in-app. The scaling path, once the catalog is large,
 is a DynamoDB GSI on `category` so it becomes an indexed query instead of a scan.
+
+## CORS
+
+The API enables CORS so a browser frontend can call it. Allowed origins come from
+`CORS_ALLOW_ORIGINS` (comma-separated); when unset it defaults to the local Vite
+dev server (`http://localhost:5173`, `http://127.0.0.1:5173`). In production, set
+it to the deployed frontend origin, e.g.:
+
+```
+CORS_ALLOW_ORIGINS=https://shop.example.com
+```
 
 ## Endpoints
 
