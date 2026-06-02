@@ -1,4 +1,4 @@
-"""DynamoDBProductRepository tests against mocked AWS (moto)."""
+"""DynamoDB repository tests against mocked AWS (moto)."""
 
 from decimal import Decimal
 
@@ -6,11 +6,12 @@ import boto3
 import pytest
 from moto import mock_aws
 
-from app.repository import DynamoDBProductRepository
-from app.seed_data import SEED_PRODUCTS
+from app.repository import DynamoDBCategoryRepository, DynamoDBProductRepository
+from app.seed_data import SEED_CATEGORIES, SEED_PRODUCTS
 
 REGION = "us-east-1"
 TABLE = "products-test"
+CATEGORIES_TABLE = "categories-test"
 
 
 @pytest.fixture
@@ -51,3 +52,41 @@ def test_get_returns_typed_product_with_decimal_price(dynamodb_table):
 def test_get_unknown_returns_none(dynamodb_table):
     repo = DynamoDBProductRepository(TABLE, region_name=REGION)
     assert repo.get_product("nope") is None
+
+
+@pytest.fixture
+def dynamodb_categories_table(monkeypatch):
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_DEFAULT_REGION", REGION)
+    with mock_aws():
+        ddb = boto3.resource("dynamodb", region_name=REGION)
+        table = ddb.create_table(
+            TableName=CATEGORIES_TABLE,
+            KeySchema=[{"AttributeName": "slug", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "slug", "AttributeType": "S"}],
+            ProvisionedThroughput={"ReadCapacityUnits": 5, "WriteCapacityUnits": 5},
+        )
+        table.wait_until_exists()
+        with table.batch_writer() as batch:
+            for category in SEED_CATEGORIES:
+                batch.put_item(Item=category.model_dump())
+        yield CATEGORIES_TABLE
+
+
+def test_list_returns_all_seed_categories(dynamodb_categories_table):
+    repo = DynamoDBCategoryRepository(CATEGORIES_TABLE, region_name=REGION)
+    assert len(repo.list_categories()) == len(SEED_CATEGORIES)
+
+
+def test_get_returns_typed_category(dynamodb_categories_table):
+    repo = DynamoDBCategoryRepository(CATEGORIES_TABLE, region_name=REGION)
+    category = repo.get_category("processors")
+    assert category is not None
+    assert category.name == "Processors"
+    assert isinstance(category.sort_order, int)
+
+
+def test_get_unknown_category_returns_none(dynamodb_categories_table):
+    repo = DynamoDBCategoryRepository(CATEGORIES_TABLE, region_name=REGION)
+    assert repo.get_category("nope") is None
