@@ -6,8 +6,29 @@ DynamoDB as the data store.
 
 ## Status
 
-Step 3 of 4 — same app runs locally (uvicorn) and on AWS Lambda (Mangum). Coming
-next: DynamoDB-backed repository.
+Complete (v0.1) — assortment API that runs locally with zero setup, deploys to
+AWS Lambda behind API Gateway, and reads from DynamoDB when configured.
+
+## Data store
+
+The repository implementation is chosen at runtime from the environment:
+
+| Env var | Effect |
+| --- | --- |
+| _(none)_ | In-memory seed data. Zero setup — just run. |
+| `PRODUCTS_TABLE` | Use DynamoDB; value is the table name. |
+| `AWS_REGION` | AWS region (set automatically on Lambda). |
+| `DYNAMODB_ENDPOINT_URL` | Optional override, e.g. DynamoDB Local. |
+
+Seed a real table (creates it if missing):
+
+```powershell
+$env:PRODUCTS_TABLE = "computer-shop-products"
+python -m scripts.seed_dynamodb
+```
+
+Table key schema: partition key `id` (String), provisioned 5 RCU / 5 WCU to stay
+within the DynamoDB always-free tier (25/25 per account).
 
 ## Endpoints
 

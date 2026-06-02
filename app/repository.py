@@ -1,13 +1,14 @@
 """Data access layer for products.
 
-`ProductRepository` is the interface the API depends on. Today the only
-implementation is in-memory; a DynamoDB-backed one is added later behind the
-same interface, so the API never changes when the store does.
+`ProductRepository` is the interface the API depends on. The factory picks the
+DynamoDB implementation when a table is configured, and otherwise falls back to
+the in-memory one so the app runs with zero AWS setup.
 """
 
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
+from app.config import get_settings
 from app.models import Product
 from app.seed_data import SEED_PRODUCTS
 
@@ -34,10 +35,48 @@ class InMemoryProductRepository(ProductRepository):
         return self._products.get(product_id)
 
 
+class DynamoDBProductRepository(ProductRepository):
+    def __init__(
+        self,
+        table_name: str,
+        *,
+        region_name: str | None = None,
+        endpoint_url: str | None = None,
+    ) -> None:
+        # Imported lazily so the in-memory path never pays the boto3 import cost.
+        import boto3
+
+        resource = boto3.resource(
+            "dynamodb", region_name=region_name, endpoint_url=endpoint_url
+        )
+        self._table = resource.Table(table_name)
+
+    def list_products(self) -> list[Product]:
+        items: list[dict] = []
+        kwargs: dict = {}
+        while True:
+            response = self._table.scan(**kwargs)
+            items.extend(response.get("Items", []))
+            last_key = response.get("LastEvaluatedKey")
+            if not last_key:
+                break
+            kwargs["ExclusiveStartKey"] = last_key
+        return [Product(**item) for item in items]
+
+    def get_product(self, product_id: str) -> Product | None:
+        response = self._table.get_item(Key={"id": product_id})
+        item = response.get("Item")
+        return Product(**item) if item else None
+
+
 @lru_cache
 def get_product_repository() -> ProductRepository:
-    """Return the repository implementation. Cached so it's a singleton.
-
-    Later this chooses DynamoDB vs in-memory based on environment.
-    """
+    """Return the repository implementation. Cached so it's a singleton."""
+    settings = get_settings()
+    if settings.products_table:
+        return DynamoDBProductRepository(
+            settings.products_table,
+            region_name=settings.aws_region,
+            endpoint_url=settings.dynamodb_endpoint_url,
+        )
     return InMemoryProductRepository()
