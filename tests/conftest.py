@@ -11,8 +11,9 @@ from app.repository import InMemoryProductRepository, get_product_repository
 @pytest.fixture
 def sample_products() -> list[Product]:
     return [
-        Product(id="gpu-a", name="Card A", brand="X", category="GPU", price="100.00", stock=2),
-        Product(id="cpu-b", name="Chip B", brand="Y", category="CPU", price="49.99", stock=0),
+        Product(id="gpu-a", name="Card A", brand="X", category="GPU", price="100.00", stock=2,
+                image_key="products/gpu-a/main.webp"),
+        Product(id="cpu-b", name="Chip B", brand="Y", category="CPU", price="49.99", stock=0),  # no image
     ]
 
 

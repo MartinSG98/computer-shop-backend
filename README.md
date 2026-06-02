@@ -6,8 +6,9 @@ DynamoDB as the data store.
 
 ## Status
 
-Complete (v0.1) — assortment API that runs locally with zero setup, deploys to
-AWS Lambda behind API Gateway, and reads from DynamoDB when configured.
+v0.2 — assortment API that runs locally with zero setup, deploys to AWS Lambda
+behind API Gateway, reads from DynamoDB when configured, and serves product
+images via S3 + CloudFront.
 
 ## Data store
 
@@ -19,6 +20,7 @@ The repository implementation is chosen at runtime from the environment:
 | `PRODUCTS_TABLE` | Use DynamoDB; value is the table name. |
 | `AWS_REGION` | AWS region (set automatically on Lambda). |
 | `DYNAMODB_ENDPOINT_URL` | Optional override, e.g. DynamoDB Local. |
+| `CDN_BASE_URL` | CloudFront base URL for product images (see below). |
 
 Seed a real table (creates it if missing):
 
@@ -30,6 +32,20 @@ python -m scripts.seed_dynamodb
 
 Table key schema: partition key `id` (String), provisioned 5 RCU / 5 WCU to stay
 within the DynamoDB always-free tier (25/25 per account).
+
+## Product images
+
+Images live in **S3** and are served via **CloudFront**. DynamoDB stores only the
+S3 object key (`image_key`, e.g. `products/gpu-rtx-4070/main.webp`); the API never
+stores or returns the raw key. Instead it returns a computed `image_url` built
+from `CDN_BASE_URL` + the key:
+
+- `CDN_BASE_URL` set and product has a key → `image_url` is the full CloudFront URL.
+- No `CDN_BASE_URL`, or product has no image → `image_url` is `null`.
+
+Storing the key (not the full URL) means the CDN domain can change without
+rewriting any records. Creating the S3 bucket and CloudFront distribution (and an
+upload endpoint) are separate, later tasks.
 
 ## Endpoints
 
