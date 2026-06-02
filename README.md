@@ -6,9 +6,9 @@ DynamoDB as the data store.
 
 ## Status
 
-v0.2 — assortment API that runs locally with zero setup, deploys to AWS Lambda
-behind API Gateway, reads from DynamoDB when configured, and serves product
-images via S3 + CloudFront.
+v0.3 — assortment API with categories. Runs locally with zero setup, deploys to
+AWS Lambda behind API Gateway, reads from DynamoDB when configured, serves product
+images via S3 + CloudFront, and supports a category taxonomy with filtering.
 
 ## Data store
 
@@ -17,21 +17,27 @@ The repository implementation is chosen at runtime from the environment:
 | Env var | Effect |
 | --- | --- |
 | _(none)_ | In-memory seed data. Zero setup — just run. |
-| `PRODUCTS_TABLE` | Use DynamoDB; value is the table name. |
+| `PRODUCTS_TABLE` | Use DynamoDB for products; value is the table name. |
+| `CATEGORIES_TABLE` | Use DynamoDB for categories; value is the table name. |
 | `AWS_REGION` | AWS region (set automatically on Lambda). |
 | `DYNAMODB_ENDPOINT_URL` | Optional override, e.g. DynamoDB Local. |
-| `CDN_BASE_URL` | CloudFront base URL for product images (see below). |
+| `CDN_BASE_URL` | CloudFront base URL for images (see below). |
 
-Seed a real table (creates it if missing):
+Products and categories are independent: set both env vars for a fully
+DynamoDB-backed app, or neither to run entirely on in-memory seed data.
+
+Seed real tables (creates them if missing):
 
 ```powershell
 $env:AWS_REGION = "eu-west-2"
 $env:PRODUCTS_TABLE = "computer-shop-products"
+$env:CATEGORIES_TABLE = "computer-shop-categories"
 python -m scripts.seed_dynamodb
 ```
 
-Table key schema: partition key `id` (String), provisioned 5 RCU / 5 WCU to stay
-within the DynamoDB always-free tier (25/25 per account).
+Key schema: products use partition key `id` (String), categories use `slug`
+(String). Both are provisioned 5 RCU / 5 WCU to stay within the DynamoDB
+always-free tier (25/25 per account).
 
 ## Product images
 
@@ -47,11 +53,29 @@ Storing the key (not the full URL) means the CDN domain can change without
 rewriting any records. Creating the S3 bucket and CloudFront distribution (and an
 upload endpoint) are separate, later tasks.
 
+## Categories
+
+Products belong to one category, referenced by a URL-safe `slug` (e.g.
+`graphics-cards`). Categories are a first-class entity with their own data
+(`name`, `description`, `sort_order`, optional image). The seed taxonomy covers a
+full PC build (processors, CPU coolers, motherboards, memory, graphics cards,
+storage, power supplies, cases) plus monitors, keyboards, mice, and headsets.
+
+Filter products with `GET /products?category=<slug>`:
+
+- unknown slug → `404` (so a typo/stale link is distinguishable from...)
+- valid slug with no products → empty list `[]` (...an empty category)
+
+Filtering is currently done in-app. The scaling path, once the catalog is large,
+is a DynamoDB GSI on `category` so it becomes an indexed query instead of a scan.
+
 ## Endpoints
 
 - `GET /health` — liveness probe
 - `GET /products` — full assortment (called on app load)
+- `GET /products?category=<slug>` — assortment filtered to a category (404 if unknown)
 - `GET /products/{product_id}` — single product (404 if unknown)
+- `GET /categories` — category taxonomy, sorted by `sort_order`
 
 ## Requirements
 
