@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+filterwarnings = [
+    # Starlette's TestClient deprecating httpx for httpx2 — third-party, not our code.
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]
