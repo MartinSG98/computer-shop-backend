@@ -1,6 +1,6 @@
 """Computer Shop API entry point."""
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 
 from app.config import Settings, get_settings
 from app.models import CategoryOut, ProductOut
@@ -33,10 +33,17 @@ def list_categories(
 
 @app.get("/products", response_model=list[ProductOut], tags=["products"])
 def list_products(
+    category: str | None = Query(default=None, description="Filter by category slug"),
     repo: ProductRepository = Depends(get_product_repository),
+    category_repo: CategoryRepository = Depends(get_category_repository),
     settings: Settings = Depends(get_settings),
 ) -> list[ProductOut]:
-    return [ProductOut.from_product(p, settings.cdn_base_url) for p in repo.list_products()]
+    if category is not None and category_repo.get_category(category) is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    products = repo.list_products()
+    if category is not None:
+        products = [p for p in products if p.category == category]
+    return [ProductOut.from_product(p, settings.cdn_base_url) for p in products]
 
 
 @app.get("/products/{product_id}", response_model=ProductOut, tags=["products"])
