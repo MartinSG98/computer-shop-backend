@@ -23,3 +23,7 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Lambda build artifacts
+build/
+*.zip
