@@ -1,0 +1,53 @@
+name: Deploy backend to Lambda
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# OIDC: assume the deploy role keylessly. No AWS access keys stored.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: lambda-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-west-2
+  FUNCTION_NAME: computer-shop-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build deployment package
+        run: |
+          rm -rf build && mkdir -p build/package
+          # The runner is Linux x86_64, so native wheels are Lambda-compatible
+          # (no --platform needed; that trick is only for building on Windows).
+          pip install --no-cache-dir -r requirements-lambda.txt -t build/package
+          cp -r app build/package/
+          (cd build/package && zip -qr ../function.zip .)
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # Repository variable (Settings → Secrets and variables → Actions →
+          # Variables). Not a secret — the OIDC trust policy restricts who can
+          # assume it. Value = terraform output github_deploy_role_arn.
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy code to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --zip-file fileb://build/function.zip

@@ -1,0 +1,5 @@
+# Runtime dependencies for the AWS Lambda package only.
+# Excludes uvicorn (local dev server) and boto3 (provided by the Lambda runtime),
+# keeping the package small for faster cold starts.
+fastapi>=0.110
+mangum>=0.17

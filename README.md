@@ -128,9 +128,26 @@ The same app runs on Lambda via Mangum. Set the function handler to:
 app.lambda_handler.handler
 ```
 
-Put it behind API Gateway (HTTP API). Package `app/` plus the dependencies from
-`requirements.txt` into the deployment artifact. (Infrastructure-as-code is
-intentionally not committed yet — the handler is the only Lambda-specific code.)
+Put it behind API Gateway (HTTP API). Infrastructure (Lambda, API Gateway,
+DynamoDB, S3/CloudFront, OIDC) is managed by Terraform in the
+`tf-module-computer_shop` / `tf-stack-computer_shop` repos.
+
+### Continuous deployment (CI)
+
+`.github/workflows/deploy.yml` deploys the Lambda code on every push to `main`
+(and via manual dispatch):
+
+1. Builds a lean package from `requirements-lambda.txt` (no uvicorn/boto3) plus
+   the `app/` package — the Linux runner produces Lambda-compatible wheels.
+2. Authenticates via **GitHub OIDC** (no stored access keys), assuming the deploy
+   role.
+3. Runs `aws lambda update-function-code`.
+
+Setup: add a repository **variable** `AWS_DEPLOY_ROLE_ARN` (Settings → Secrets and
+variables → Actions → Variables) set to `terraform output github_deploy_role_arn`.
+It's a variable, not a secret — the role's OIDC trust restricts who can assume it.
+Terraform owns the function config and ignores code changes, so CI and Terraform
+don't conflict.
 
 ### Why HTTP API instead of REST API
 
