@@ -1,8 +1,8 @@
-"""Sample categories and products used by the in-memory repositories.
+"""Catalog seed data (categories and products) used by the in-memory repositories.
 
-The catalog is being filled out category by category. Processors lists the full
-AMD Ryzen 9000 and Intel Core Ultra 200S lineups; other categories currently hold
-a single representative item each.
+A full PC-parts catalog across 12 categories. Product images live in S3 under
+keys matching each product's image_key (`<category>/<id>.jpg`); see
+scripts/seed_dynamodb.py and the README for the seeding workflow.
 """
 
 from decimal import Decimal
@@ -711,15 +711,38 @@ SEED_PRODUCTS: list[Product] = [
         image_key="mice/mouse-steelseries-aerox-5-wireless.jpg",
         specs={"dpi": "18000", "connectivity": "Wireless (2.4GHz / Bluetooth)", "buttons": "9"},
     ),
+    # --- Headsets: SteelSeries Arctis (budget / mid / high) ---
     Product(
-        id="headset-arctis-nova-7",
-        name="Arctis Nova 7 Wireless",
+        id="headset-steelseries-arctis-nova-1",
+        name="SteelSeries Arctis Nova 1",
         brand="SteelSeries",
         category="headsets",
-        price=Decimal("149.99"),
-        stock=12,
-        description="Wireless gaming headset.",
-        image_key=None,
-        specs={"connectivity": "2.4GHz Wireless / Bluetooth", "drivers": "40mm", "mic": "Retractable"},
+        price=Decimal("59.99"),
+        stock=25,
+        description="Budget wired gaming headset with a retractable mic.",
+        image_key="headsets/headset-steelseries-arctis-nova-1.jpg",
+        specs={"connectivity": "Wired (3.5mm)", "drivers": "Neodymium", "mic": "Retractable ClearCast"},
+    ),
+    Product(
+        id="headset-steelseries-arctis-nova-5",
+        name="SteelSeries Arctis Nova 5 Wireless",
+        brand="SteelSeries",
+        category="headsets",
+        price=Decimal("129.99"),
+        stock=16,
+        description="Mid-range wireless gaming headset.",
+        image_key="headsets/headset-steelseries-arctis-nova-5.jpg",
+        specs={"connectivity": "Wireless (2.4GHz / Bluetooth)", "drivers": "Neodymium", "mic": "Retractable ClearCast"},
+    ),
+    Product(
+        id="headset-steelseries-arctis-nova-pro-wireless",
+        name="SteelSeries Arctis Nova Pro Wireless",
+        brand="SteelSeries",
+        category="headsets",
+        price=Decimal("349.99"),
+        stock=8,
+        description="Flagship wireless headset with active noise cancellation and a GameDAC.",
+        image_key="headsets/headset-steelseries-arctis-nova-pro-wireless.jpg",
+        specs={"connectivity": "Wireless (2.4GHz / Bluetooth)", "drivers": "Neodymium", "mic": "Retractable ClearCast", "anc": "Active Noise Cancellation"},
     ),
 ]
