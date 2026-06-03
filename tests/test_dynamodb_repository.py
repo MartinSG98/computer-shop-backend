@@ -42,10 +42,10 @@ def test_list_returns_all_seed_products(dynamodb_table):
 
 def test_get_returns_typed_product_with_decimal_price(dynamodb_table):
     repo = DynamoDBProductRepository(TABLE, region_name=REGION)
-    product = repo.get_product("cpu-ryzen-7800x3d")
+    product = repo.get_product("cpu-ryzen-9800x3d")
     assert product is not None
-    assert product.name == "Ryzen 7 7800X3D"
-    assert product.price == Decimal("349.00")
+    assert product.name == "Ryzen 7 9800X3D"
+    assert product.price == Decimal("479.00")
     assert isinstance(product.stock, int)
 
 

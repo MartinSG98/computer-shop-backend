@@ -27,3 +27,6 @@ htmlcov/
 # Lambda build artifacts
 build/
 *.zip
+
+# Local seed images (uploaded to S3, not committed)
+seed_images/
