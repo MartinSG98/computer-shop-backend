@@ -41,19 +41,36 @@ Key schema: products use partition key `id` (String), categories use `slug`
 (String). Both are provisioned 5 RCU / 5 WCU to stay within the DynamoDB
 always-free tier (25/25 per account).
 
+Re-running the seed is idempotent and **prunes** rows no longer present in
+`app/seed_data.py`, so the tables always match the seed.
+
 ## Product images
 
-Images live in **S3** and are served via **CloudFront**. DynamoDB stores only the
-S3 object key (`image_key`, e.g. `products/gpu-rtx-4070/main.webp`); the API never
-stores or returns the raw key. Instead it returns a computed `image_url` built
-from `CDN_BASE_URL` + the key:
+Images live in **S3** and are served via **CloudFront** (both provisioned by the
+Terraform stack). DynamoDB stores only the S3 object key (`image_key`, e.g.
+`cpus/amd.jpg` or `coolers/<id>.jpg`); the API never stores or returns the raw
+key. Instead it returns a computed `image_url` built from `CDN_BASE_URL` + the key:
 
 - `CDN_BASE_URL` set and product has a key → `image_url` is the full CloudFront URL.
 - No `CDN_BASE_URL`, or product has no image → `image_url` is `null`.
 
 Storing the key (not the full URL) means the CDN domain can change without
-rewriting any records. Creating the S3 bucket and CloudFront distribution (and an
-upload endpoint) are separate, later tasks.
+rewriting any records.
+
+### Uploading images
+
+Place files under `seed_images/` so the folder mirrors the S3 keys (e.g.
+`seed_images/cpus/amd.jpg`), then sync to the images bucket:
+
+```powershell
+aws s3 sync seed_images/ s3://<images-bucket>/   # name from: terraform output images_bucket_name
+```
+
+`seed_images/` is gitignored — images live in S3, not the repo. Use JPG (the AWS
+CLI sets `Content-Type` automatically so CloudFront serves inline). **Overwriting**
+an existing key needs a CloudFront invalidation
+(`aws cloudfront create-invalidation --distribution-id <id> --paths "/<prefix>/*"`);
+brand-new keys don't.
 
 ## Categories
 
