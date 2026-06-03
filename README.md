@@ -165,3 +165,11 @@ Reach for REST API only if you need API keys + usage plans (per-client
 throttling/quotas), gateway-level response caching, or edge-optimized endpoints.
 For caching a rarely-changing assortment, CloudFront in front of HTTP API is
 usually the better lever than switching to REST API.
+
+## Related
+
+Part of the Computer Shop project:
+
+- [computer_shop_ui](https://github.com/MartinSG98/computer_shop_ui) — React/Vite/Mantine frontend
+- [tf-module-computer_shop](https://github.com/MartinSG98/tf-module-computer_shop) — Terraform infrastructure module
+- [tf-stack-computer_shop](https://github.com/MartinSG98/tf-stack-computer_shop) — Terraform deployment stack
