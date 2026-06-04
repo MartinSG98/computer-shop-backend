@@ -391,6 +391,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Entry 1080p Blackwell GPU.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5060.jpg",
         specs={"vram": "8GB GDDR7", "bus": "128-bit", "tdp": "145W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=282, tdp_w=145, recommended_psu_w=550),
     ),
     Product(
         id="gpu-gigabyte-rtx-5060-ti",
@@ -402,6 +403,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Strong 1080p / entry 1440p GPU with 16GB.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5060-ti.jpg",
         specs={"vram": "16GB GDDR7", "bus": "128-bit", "tdp": "180W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=282, tdp_w=180, recommended_psu_w=600),
     ),
     Product(
         id="gpu-gigabyte-rtx-5070",
@@ -413,6 +415,7 @@ SEED_PRODUCTS: list[Product] = [
         description="1440p high-refresh gaming GPU.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5070.jpg",
         specs={"vram": "12GB GDDR7", "bus": "192-bit", "tdp": "250W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=300, tdp_w=250, recommended_psu_w=650),
     ),
     Product(
         id="gpu-gigabyte-rtx-5070-ti",
@@ -424,6 +427,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-end 1440p / entry 4K GPU with 16GB.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5070-ti.jpg",
         specs={"vram": "16GB GDDR7", "bus": "256-bit", "tdp": "300W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=340, tdp_w=300, recommended_psu_w=750),
     ),
     Product(
         id="gpu-gigabyte-rtx-5080",
@@ -435,6 +439,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Enthusiast 4K gaming GPU.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5080.jpg",
         specs={"vram": "16GB GDDR7", "bus": "256-bit", "tdp": "360W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=340, tdp_w=360, recommended_psu_w=850),
     ),
     Product(
         id="gpu-gigabyte-rtx-5090",
@@ -446,6 +451,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Flagship Blackwell GPU for 4K and beyond.",
         image_key="graphics-cards/gpu-gigabyte-rtx-5090.jpg",
         specs={"vram": "32GB GDDR7", "bus": "512-bit", "tdp": "575W", "ports": "3x DP 2.1b, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=360, tdp_w=575, recommended_psu_w=1000),
     ),
     # --- Graphics Cards: Sapphire (AMD Radeon RDNA 4) ---
     Product(
@@ -458,6 +464,7 @@ SEED_PRODUCTS: list[Product] = [
         description="1080p / 1440p RDNA 4 GPU with 16GB.",
         image_key="graphics-cards/gpu-sapphire-rx-9060-xt.jpg",
         specs={"vram": "16GB GDDR6", "bus": "128-bit", "tdp": "160W", "ports": "3x DP 2.1, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=280, tdp_w=160, recommended_psu_w=550),
     ),
     Product(
         id="gpu-sapphire-rx-9070-xt",
@@ -469,6 +476,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-end 1440p / 4K RDNA 4 GPU with 16GB.",
         image_key="graphics-cards/gpu-sapphire-rx-9070-xt.jpg",
         specs={"vram": "16GB GDDR6", "bus": "256-bit", "tdp": "304W", "ports": "3x DP 2.1, 1x HDMI 2.1"},
+        attributes=CompatAttributes(length_mm=330, tdp_w=304, recommended_psu_w=800),
     ),
     # --- Storage: Samsung NVMe SSDs ---
     Product(
@@ -481,6 +489,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Entry PCIe 4.0 NVMe drive.",
         image_key="storage/ssd-samsung-980pro-250gb.jpg",
         specs={"capacity": "250GB", "interface": "PCIe 4.0 NVMe", "form_factor": "M.2 2280", "read": "6400 MB/s"},
+        attributes=CompatAttributes(storage_form_factor="M.2", interface="NVMe"),
     ),
     Product(
         id="ssd-samsung-980pro-500gb",
@@ -492,6 +501,7 @@ SEED_PRODUCTS: list[Product] = [
         description="PCIe 4.0 NVMe drive.",
         image_key="storage/ssd-samsung-980pro-500gb.jpg",
         specs={"capacity": "500GB", "interface": "PCIe 4.0 NVMe", "form_factor": "M.2 2280", "read": "6900 MB/s"},
+        attributes=CompatAttributes(storage_form_factor="M.2", interface="NVMe"),
     ),
     Product(
         id="ssd-samsung-990pro-1tb",
@@ -503,6 +513,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-performance PCIe 4.0 NVMe drive.",
         image_key="storage/ssd-samsung-990pro-1tb.jpg",
         specs={"capacity": "1TB", "interface": "PCIe 4.0 NVMe", "form_factor": "M.2 2280", "read": "7450 MB/s"},
+        attributes=CompatAttributes(storage_form_factor="M.2", interface="NVMe"),
     ),
     Product(
         id="ssd-samsung-990pro-2tb",
@@ -514,6 +525,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-performance PCIe 4.0 NVMe drive.",
         image_key="storage/ssd-samsung-990pro-2tb.jpg",
         specs={"capacity": "2TB", "interface": "PCIe 4.0 NVMe", "form_factor": "M.2 2280", "read": "7450 MB/s"},
+        attributes=CompatAttributes(storage_form_factor="M.2", interface="NVMe"),
     ),
     # --- Power Supplies: Corsair RMe (80+ Gold, fully modular, ATX 3.1) ---
     Product(
@@ -526,6 +538,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Fully modular 650W ATX 3.1 power supply.",
         image_key="power-supplies/psu-corsair-rm650e.jpg",
         specs={"wattage": "650W", "rating": "80+ Gold", "modular": "Full", "form_factor": "ATX", "standard": "ATX 3.1"},
+        attributes=CompatAttributes(wattage_w=650, form_factor="ATX"),
     ),
     Product(
         id="psu-corsair-rm850e",
@@ -537,6 +550,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Fully modular 850W ATX 3.1 power supply.",
         image_key="power-supplies/psu-corsair-rm850e.jpg",
         specs={"wattage": "850W", "rating": "80+ Gold", "modular": "Full", "form_factor": "ATX", "standard": "ATX 3.1"},
+        attributes=CompatAttributes(wattage_w=850, form_factor="ATX"),
     ),
     Product(
         id="psu-corsair-rm1000e",
@@ -548,6 +562,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Fully modular 1000W ATX 3.1 power supply.",
         image_key="power-supplies/psu-corsair-rm1000e.jpg",
         specs={"wattage": "1000W", "rating": "80+ Gold", "modular": "Full", "form_factor": "ATX", "standard": "ATX 3.1"},
+        attributes=CompatAttributes(wattage_w=1000, form_factor="ATX"),
     ),
     Product(
         id="psu-corsair-rm1200e",
@@ -559,6 +574,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Fully modular 1200W ATX 3.1 power supply.",
         image_key="power-supplies/psu-corsair-rm1200e.jpg",
         specs={"wattage": "1200W", "rating": "80+ Gold", "modular": "Full", "form_factor": "ATX", "standard": "ATX 3.1"},
+        attributes=CompatAttributes(wattage_w=1200, form_factor="ATX"),
     ),
     # --- Cases: budget / mid / mid / high ---
     Product(
@@ -571,6 +587,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Budget airflow ATX mid-tower with mesh front.",
         image_key="cases/case-montech-air-903.jpg",
         specs={"form_factor": "Mid Tower", "supports": "ATX / mATX / ITX", "gpu_clearance": "330mm", "included_fans": "4"},
+        attributes=CompatAttributes(form_factors=["ATX", "mATX", "ITX"], max_gpu_length_mm=330, max_cooler_height_mm=175, max_radiator_mm=360, psu_form_factors=["ATX"]),
     ),
     Product(
         id="case-lian-li-216",
@@ -582,6 +599,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Airflow ATX mid-tower with two 160mm front fans.",
         image_key="cases/case-lian-li-216.jpg",
         specs={"form_factor": "Mid Tower", "supports": "ATX / mATX / ITX", "gpu_clearance": "392mm", "included_fans": "3"},
+        attributes=CompatAttributes(form_factors=["ATX", "mATX", "ITX"], max_gpu_length_mm=392, max_cooler_height_mm=180, max_radiator_mm=360, psu_form_factors=["ATX"]),
     ),
     Product(
         id="case-fractal-north",
@@ -593,6 +611,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Mid-tower with a real walnut front and mesh side.",
         image_key="cases/case-fractal-north.jpg",
         specs={"form_factor": "Mid Tower", "supports": "ATX / mATX / ITX", "gpu_clearance": "355mm", "included_fans": "2"},
+        attributes=CompatAttributes(form_factors=["ATX", "mATX", "ITX"], max_gpu_length_mm=355, max_cooler_height_mm=170, max_radiator_mm=360, psu_form_factors=["ATX"]),
     ),
     Product(
         id="case-lian-li-o11-evo-rgb",
@@ -604,6 +623,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-end dual-chamber showcase case.",
         image_key="cases/case-lian-li-o11-evo-rgb.jpg",
         specs={"form_factor": "Mid Tower", "supports": "E-ATX / ATX / mATX / ITX", "gpu_clearance": "426mm", "included_fans": "3"},
+        attributes=CompatAttributes(form_factors=["E-ATX", "ATX", "mATX", "ITX"], max_gpu_length_mm=426, max_cooler_height_mm=167, max_radiator_mm=360, psu_form_factors=["ATX"]),
     ),
     # --- Monitors: Samsung Odyssey G-series (G3 to G8) ---
     Product(
