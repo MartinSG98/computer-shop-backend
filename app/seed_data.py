@@ -7,7 +7,7 @@ scripts/seed_dynamodb.py and the README for the seeding workflow.
 
 from decimal import Decimal
 
-from app.models import Category, Product
+from app.models import Category, CompatAttributes, Product
 
 SEED_CATEGORIES: list[Category] = [
     Category(slug="processors", name="Processors", description="CPUs.", sort_order=1),
@@ -36,6 +36,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Entry Zen 5 6-core for efficient mainstream builds.",
         image_key="cpus/amd.jpg",
         specs={"cores": "6", "threads": "12", "socket": "AM5", "boost_clock": "5.4 GHz", "cache": "32MB L3", "tdp": "65W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=90, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9700x",
@@ -47,6 +48,7 @@ SEED_PRODUCTS: list[Product] = [
         description="8-core Zen 5 sweet spot for gaming and productivity.",
         image_key="cpus/amd.jpg",
         specs={"cores": "8", "threads": "16", "socket": "AM5", "boost_clock": "5.5 GHz", "cache": "32MB L3", "tdp": "65W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=90, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9900x",
@@ -58,6 +60,7 @@ SEED_PRODUCTS: list[Product] = [
         description="12-core Zen 5 for heavy multitasking and content creation.",
         image_key="cpus/amd.jpg",
         specs={"cores": "12", "threads": "24", "socket": "AM5", "boost_clock": "5.6 GHz", "cache": "64MB L3", "tdp": "120W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=160, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9950x",
@@ -69,6 +72,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Flagship 16-core Zen 5 for serious productivity.",
         image_key="cpus/amd.jpg",
         specs={"cores": "16", "threads": "32", "socket": "AM5", "boost_clock": "5.7 GHz", "cache": "64MB L3", "tdp": "170W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=230, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9800x3d",
@@ -80,6 +84,7 @@ SEED_PRODUCTS: list[Product] = [
         description="8-core with 2nd-gen 3D V-Cache — top-tier gaming.",
         image_key="cpus/amd.jpg",
         specs={"cores": "8", "threads": "16", "socket": "AM5", "boost_clock": "5.2 GHz", "cache": "96MB (3D V-Cache)", "tdp": "120W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=160, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9850x3d",
@@ -91,6 +96,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Refined 8-core 3D V-Cache with higher clocks than the 9800X3D.",
         image_key="cpus/amd.jpg",
         specs={"cores": "8", "threads": "16", "socket": "AM5", "boost_clock": "5.6 GHz", "cache": "96MB (3D V-Cache)", "tdp": "120W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=160, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9900x3d",
@@ -102,6 +108,7 @@ SEED_PRODUCTS: list[Product] = [
         description="12-core 3D V-Cache balancing gaming and creation.",
         image_key="cpus/amd.jpg",
         specs={"cores": "12", "threads": "24", "socket": "AM5", "boost_clock": "5.5 GHz", "cache": "128MB (3D V-Cache)", "tdp": "120W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=160, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9950x3d",
@@ -113,6 +120,7 @@ SEED_PRODUCTS: list[Product] = [
         description="16-core 3D V-Cache — elite gaming and productivity.",
         image_key="cpus/amd.jpg",
         specs={"cores": "16", "threads": "32", "socket": "AM5", "boost_clock": "5.7 GHz", "cache": "128MB (3D V-Cache)", "tdp": "170W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=230, has_igpu=True),
     ),
     Product(
         id="cpu-ryzen-9950x3d2",
@@ -124,6 +132,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Dual 3D V-Cache edition (192MB) for creators and developers.",
         image_key="cpus/amd.jpg",
         specs={"cores": "16", "threads": "32", "socket": "AM5", "boost_clock": "5.6 GHz", "cache": "192MB (3D V-Cache)", "tdp": "200W"},
+        attributes=CompatAttributes(socket="AM5", tdp_w=250, has_igpu=True),
     ),
     # --- Processors: Intel Core Ultra 200S (Arrow Lake, LGA1851) ---
     Product(
@@ -136,6 +145,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Flagship 24-core Arrow Lake with on-package NPU.",
         image_key="cpus/intel.jpg",
         specs={"cores": "24 (8P + 16E)", "threads": "24", "socket": "LGA1851", "boost_clock": "5.7 GHz", "cache": "36MB L3", "tdp": "125W (250W max)"},
+        attributes=CompatAttributes(socket="LGA1851", tdp_w=250, has_igpu=True),
     ),
     Product(
         id="cpu-intel-265k",
@@ -147,6 +157,7 @@ SEED_PRODUCTS: list[Product] = [
         description="20-core Arrow Lake for high-end gaming and multitasking.",
         image_key="cpus/intel.jpg",
         specs={"cores": "20 (8P + 12E)", "threads": "20", "socket": "LGA1851", "boost_clock": "5.5 GHz", "cache": "30MB L3", "tdp": "125W (250W max)"},
+        attributes=CompatAttributes(socket="LGA1851", tdp_w=250, has_igpu=True),
     ),
     Product(
         id="cpu-intel-265kf",
@@ -158,6 +169,7 @@ SEED_PRODUCTS: list[Product] = [
         description="20-core Arrow Lake with no integrated graphics — pair with a discrete GPU.",
         image_key="cpus/intel.jpg",
         specs={"cores": "20 (8P + 12E)", "threads": "20", "socket": "LGA1851", "boost_clock": "5.5 GHz", "cache": "30MB L3", "tdp": "125W (250W max)"},
+        attributes=CompatAttributes(socket="LGA1851", tdp_w=250, has_igpu=False),
     ),
     Product(
         id="cpu-intel-245k",
@@ -169,6 +181,7 @@ SEED_PRODUCTS: list[Product] = [
         description="14-core Arrow Lake for mainstream high-performance builds.",
         image_key="cpus/intel.jpg",
         specs={"cores": "14 (6P + 8E)", "threads": "14", "socket": "LGA1851", "boost_clock": "5.2 GHz", "cache": "24MB L3", "tdp": "125W (159W max)"},
+        attributes=CompatAttributes(socket="LGA1851", tdp_w=160, has_igpu=True),
     ),
     Product(
         id="cpu-intel-245kf",
@@ -180,6 +193,7 @@ SEED_PRODUCTS: list[Product] = [
         description="14-core Arrow Lake with no integrated graphics.",
         image_key="cpus/intel.jpg",
         specs={"cores": "14 (6P + 8E)", "threads": "14", "socket": "LGA1851", "boost_clock": "5.2 GHz", "cache": "24MB L3", "tdp": "125W (159W max)"},
+        attributes=CompatAttributes(socket="LGA1851", tdp_w=160, has_igpu=False),
     ),
     # --- CPU Coolers: Noctua air ---
     Product(
@@ -192,6 +206,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Flagship dual-tower air cooler that rivals many 240mm AIOs.",
         image_key="coolers/cooler-noctua-nh-d15-g2.jpg",
         specs={"type": "Air", "height": "168mm", "heatpipes": "8", "fans": "2x 140mm", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="air", height_mm=168, tdp_rating_w=280),
     ),
     Product(
         id="cooler-noctua-nh-u12a",
@@ -203,6 +218,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Premium 120mm single-tower with great RAM and PCIe clearance.",
         image_key="coolers/cooler-noctua-nh-u12a.jpg",
         specs={"type": "Air", "height": "158mm", "heatpipes": "7", "fans": "2x 120mm", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="air", height_mm=158, tdp_rating_w=180),
     ),
     Product(
         id="cooler-noctua-nh-l12s",
@@ -214,6 +230,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Low-profile cooler for small-form-factor builds.",
         image_key="coolers/cooler-noctua-nh-l12s.jpg",
         specs={"type": "Air (low-profile)", "height": "70mm", "heatpipes": "4", "fans": "1x 120mm", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="air", height_mm=70, tdp_rating_w=95),
     ),
     # --- CPU Coolers: Gigabyte AORUS WATERFORCE X (AIO) ---
     Product(
@@ -226,6 +243,7 @@ SEED_PRODUCTS: list[Product] = [
         description="360mm AIO liquid cooler with a rotatable circular LCD.",
         image_key="coolers/cooler-aorus-waterforce-x-360.jpg",
         specs={"type": "Liquid (AIO)", "radiator": "360mm", "fans": "3x 120mm ARGB", "display": "Circular LCD", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="aio", radiator_mm=360, tdp_rating_w=350),
     ),
     Product(
         id="cooler-aorus-waterforce-x-280",
@@ -237,6 +255,7 @@ SEED_PRODUCTS: list[Product] = [
         description="280mm AIO liquid cooler with a rotatable circular LCD.",
         image_key="coolers/cooler-aorus-waterforce-x-280.jpg",
         specs={"type": "Liquid (AIO)", "radiator": "280mm", "fans": "2x 140mm ARGB", "display": "Circular LCD", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="aio", radiator_mm=280, tdp_rating_w=300),
     ),
     Product(
         id="cooler-aorus-waterforce-x-240",
@@ -248,6 +267,7 @@ SEED_PRODUCTS: list[Product] = [
         description="240mm AIO liquid cooler with a rotatable circular LCD.",
         image_key="coolers/cooler-aorus-waterforce-x-240.jpg",
         specs={"type": "Liquid (AIO)", "radiator": "240mm", "fans": "2x 120mm ARGB", "display": "Circular LCD", "sockets": "AM5 / LGA1851 / LGA1700"},
+        attributes=CompatAttributes(sockets=["AM5", "LGA1851", "LGA1700"], cooler_type="aio", radiator_mm=240, tdp_rating_w=250),
     ),
     # --- Motherboards: AM5 (Ryzen 9000) ---
     Product(
@@ -260,6 +280,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Budget AM5 ATX board with DDR5 and Wi-Fi 6E.",
         image_key="motherboards/mobo-gigabyte-b650-elite-ax.jpg",
         specs={"socket": "AM5", "chipset": "B650", "form_factor": "ATX", "memory": "DDR5", "pcie": "PCIe 4.0", "wifi": "Wi-Fi 6E"},
+        attributes=CompatAttributes(socket="AM5", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=3),
     ),
     Product(
         id="mobo-gigabyte-x870-elite-wifi7",
@@ -271,6 +292,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Mid-range AM5 board with PCIe 5.0, USB4 and Wi-Fi 7.",
         image_key="motherboards/mobo-gigabyte-x870-elite-wifi7.jpg",
         specs={"socket": "AM5", "chipset": "X870", "form_factor": "ATX", "memory": "DDR5", "pcie": "PCIe 5.0", "wifi": "Wi-Fi 7"},
+        attributes=CompatAttributes(socket="AM5", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=3),
     ),
     Product(
         id="mobo-gigabyte-x870e-master",
@@ -282,6 +304,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-end AM5 board: 16+2+2 VRM, 4x M.2, dual USB4, 5GbE, Wi-Fi 7.",
         image_key="motherboards/mobo-gigabyte-x870e-master.jpg",
         specs={"socket": "AM5", "chipset": "X870E", "form_factor": "ATX", "memory": "DDR5 (up to 8600)", "pcie": "PCIe 5.0", "wifi": "Wi-Fi 7"},
+        attributes=CompatAttributes(socket="AM5", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=4),
     ),
     # --- Motherboards: Intel LGA1851 (Core Ultra 200S) ---
     Product(
@@ -294,6 +317,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Budget LGA1851 board for Core Ultra 200S with Wi-Fi 7.",
         image_key="motherboards/mobo-gigabyte-b860-elite-wifi7.jpg",
         specs={"socket": "LGA1851", "chipset": "B860", "form_factor": "ATX", "memory": "DDR5", "pcie": "PCIe 5.0", "wifi": "Wi-Fi 7"},
+        attributes=CompatAttributes(socket="LGA1851", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=3),
     ),
     Product(
         id="mobo-gigabyte-z890-elite-wifi7",
@@ -305,6 +329,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Mid-range Z890 board with PCIe 5.0, USB4 and Wi-Fi 7.",
         image_key="motherboards/mobo-gigabyte-z890-elite-wifi7.jpg",
         specs={"socket": "LGA1851", "chipset": "Z890", "form_factor": "ATX", "memory": "DDR5", "pcie": "PCIe 5.0", "wifi": "Wi-Fi 7"},
+        attributes=CompatAttributes(socket="LGA1851", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=4),
     ),
     Product(
         id="mobo-gigabyte-z890-master",
@@ -316,6 +341,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-end Z890 board: high-phase VRM, dual USB4, 5GbE, Wi-Fi 7.",
         image_key="motherboards/mobo-gigabyte-z890-master.jpg",
         specs={"socket": "LGA1851", "chipset": "Z890", "form_factor": "ATX", "memory": "DDR5", "pcie": "PCIe 5.0", "wifi": "Wi-Fi 7"},
+        attributes=CompatAttributes(socket="LGA1851", form_factor="ATX", memory_type="DDR5", memory_slots=4, memory_max_gb=192, m2_slots=4),
     ),
     # --- Memory: DDR5 (works on both AM5 and LGA1851) ---
     Product(
@@ -328,6 +354,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Entry 32GB (2x16GB) DDR5-5600 kit.",
         image_key="memory/ram-gskill-ddr5-5600-32gb.jpg",
         specs={"capacity": "32GB (2x16GB)", "type": "DDR5", "speed": "5600 MT/s", "cas": "CL36"},
+        attributes=CompatAttributes(memory_type="DDR5", modules=2, capacity_gb=32, speed_mts=5600),
     ),
     Product(
         id="ram-gskill-ddr5-6000-32gb",
@@ -339,6 +366,7 @@ SEED_PRODUCTS: list[Product] = [
         description="Sweet-spot 32GB (2x16GB) DDR5-6000 CL30 kit.",
         image_key="memory/ram-gskill-ddr5-6000-32gb.jpg",
         specs={"capacity": "32GB (2x16GB)", "type": "DDR5", "speed": "6000 MT/s", "cas": "CL30"},
+        attributes=CompatAttributes(memory_type="DDR5", modules=2, capacity_gb=32, speed_mts=6000),
     ),
     Product(
         id="ram-gskill-ddr5-6400-32gb",
@@ -350,6 +378,7 @@ SEED_PRODUCTS: list[Product] = [
         description="High-speed 32GB (2x16GB) DDR5-6400 CL32 kit.",
         image_key="memory/ram-gskill-ddr5-6400-32gb.jpg",
         specs={"capacity": "32GB (2x16GB)", "type": "DDR5", "speed": "6400 MT/s", "cas": "CL32"},
+        attributes=CompatAttributes(memory_type="DDR5", modules=2, capacity_gb=32, speed_mts=6400),
     ),
     # --- Graphics Cards: Gigabyte RTX 50 series (non-AORUS) ---
     Product(
