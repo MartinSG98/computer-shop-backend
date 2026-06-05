@@ -34,7 +34,10 @@ def _ensure_table(ddb, table_name: str, key_attr: str):
 def _load(table, items) -> None:
     with table.batch_writer() as batch:
         for item in items:
-            batch.put_item(Item=item.model_dump())
+            # exclude_none keeps items lean: unset compat attributes (and the
+            # whole `attributes` map on peripherals) aren't written as NULLs.
+            # False/0 are preserved (e.g. has_igpu=False), only None is dropped.
+            batch.put_item(Item=item.model_dump(exclude_none=True))
 
 
 def _prune(table, key_attr: str, valid_keys: set[str]) -> int:
