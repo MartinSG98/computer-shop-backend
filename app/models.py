@@ -60,6 +60,10 @@ class CompatAttributes(BaseModel):
     max_radiator_mm: int | None = None
     psu_form_factors: list[str] | None = None
 
+    # Relative positioning tier (1 = entry .. 4 = flagship), for balance/overkill
+    # advice. Set on processors, graphics cards and motherboards only.
+    tier: int | None = None
+
 
 class ProductBase(BaseModel):
     id: str
