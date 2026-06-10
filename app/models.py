@@ -121,3 +121,21 @@ class CategoryOut(CategoryBase):
             **category.model_dump(exclude={"image_key"}),
             image_url=_image_url(category.image_key, cdn_base_url),
         )
+
+
+class ChatRequest(BaseModel):
+    """One customer message to the support agent.
+
+    The length cap bounds the Bedrock token spend per request; the session id
+    minimum is an AgentCore requirement (>= 33 chars), enforced here so bad ids
+    fail fast as a 422 instead of deep inside the invoke call.
+    """
+
+    message: str = Field(min_length=1, max_length=500)
+    session_id: str = Field(min_length=33, max_length=100)
+
+
+class ChatOut(BaseModel):
+    """API response shape: the agent's reply text."""
+
+    reply: str

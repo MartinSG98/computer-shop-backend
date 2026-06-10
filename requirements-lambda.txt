@@ -1,5 +1,10 @@
 # Runtime dependencies for the AWS Lambda package only.
-# Excludes uvicorn (local dev server) and boto3 (provided by the Lambda runtime),
-# keeping the package small for faster cold starts.
+# Excludes uvicorn (local dev server), keeping the package small for faster
+# cold starts.
 fastapi>=0.110
 mangum>=0.17
+# boto3 is bundled in the Lambda runtime, but the bundled copy lags behind and
+# may predate the bedrock-agentcore service the /chat route calls. Ship our own
+# (same pin the support-agent repo uses) so the API never depends on AWS's
+# runtime refresh schedule.
+boto3==1.43.26

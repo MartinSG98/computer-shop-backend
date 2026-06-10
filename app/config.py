@@ -15,6 +15,7 @@ class Settings:
     dynamodb_endpoint_url: str | None
     cdn_base_url: str | None
     cors_allow_origins: list[str]
+    agent_runtime_arn: str | None
 
 
 def _parse_origins(value: str | None) -> list[str]:
@@ -31,4 +32,5 @@ def get_settings() -> Settings:
         dynamodb_endpoint_url=os.getenv("DYNAMODB_ENDPOINT_URL"),
         cdn_base_url=os.getenv("CDN_BASE_URL"),
         cors_allow_origins=_parse_origins(os.getenv("CORS_ALLOW_ORIGINS")),
+        agent_runtime_arn=os.getenv("AGENT_RUNTIME_ARN"),
     )
