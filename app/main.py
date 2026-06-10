@@ -1,10 +1,13 @@
 """Computer Shop API entry point."""
 
+import logging
+
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agent_client import invoke_support_agent
 from app.config import Settings, get_settings
-from app.models import CategoryOut, ProductOut
+from app.models import CategoryOut, ChatOut, ChatRequest, ProductOut
 from app.repository import (
     CategoryRepository,
     ProductRepository,
@@ -64,3 +67,25 @@ def get_product(
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return ProductOut.from_product(product, settings.cdn_base_url)
+
+
+@app.post("/chat", response_model=ChatOut, tags=["chat"])
+def chat(
+    request: ChatRequest,
+    settings: Settings = Depends(get_settings),
+) -> ChatOut:
+    if settings.agent_runtime_arn is None:
+        raise HTTPException(status_code=503, detail="Chat is not configured")
+    try:
+        reply = invoke_support_agent(
+            agent_runtime_arn=settings.agent_runtime_arn,
+            region_name=settings.aws_region,
+            session_id=request.session_id,
+            message=request.message,
+        )
+    except Exception:
+        # Whatever went wrong upstream, the customer gets one stable message.
+        # Details (which may include ARNs) belong in the logs, not the response.
+        logging.getLogger(__name__).exception("Support agent invocation failed")
+        raise HTTPException(status_code=502, detail="Support agent unavailable")
+    return ChatOut(reply=reply)
