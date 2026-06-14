@@ -169,6 +169,49 @@ class Order(BaseModel):
     items: list[OrderLineItem]
 
 
+class SalesSummary(BaseModel):
+    """Headline KPIs for the admin dashboard."""
+
+    order_count: int
+    total_revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    average_order_value: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    units_sold: int
+
+
+class SalesByDay(BaseModel):
+    """One point on the sales-over-time series."""
+
+    date: str  # YYYY-MM-DD
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    orders: int
+
+
+class TopProduct(BaseModel):
+    """A product ranked by units sold (revenue breaks ties)."""
+
+    product_id: str
+    name: str
+    units: int
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+
+
+class SalesByCategory(BaseModel):
+    """Aggregated sales for one category."""
+
+    category: str
+    units: int
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+
+
+class AdminOverview(BaseModel):
+    """Everything the admin dashboard needs, from a single scan of the orders."""
+
+    summary: SalesSummary
+    sales_over_time: list[SalesByDay]
+    top_products: list[TopProduct]
+    sales_by_category: list[SalesByCategory]
+
+
 class ChatRequest(BaseModel):
     """One customer message to the support agent.
 

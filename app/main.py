@@ -9,8 +9,11 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent_client import invoke_support_agent
+from app.auth import require_admin
 from app.config import Settings, get_settings
+from app.metrics import compute_overview
 from app.models import (
+    AdminOverview,
     CategoryOut,
     ChatOut,
     ChatRequest,
@@ -126,6 +129,33 @@ def create_order(
     )
     orders.add_order(order)
     return order
+
+
+@app.get(
+    "/admin/overview",
+    response_model=AdminOverview,
+    tags=["admin"],
+    dependencies=[Depends(require_admin)],
+)
+def admin_overview(
+    orders: OrderRepository = Depends(get_order_repository),
+) -> AdminOverview:
+    """Dashboard metrics: KPIs, sales over time, top products, sales by category.
+    Computed from a single scan of the orders table."""
+    return compute_overview(orders.list_orders())
+
+
+@app.get(
+    "/admin/orders",
+    response_model=list[Order],
+    tags=["admin"],
+    dependencies=[Depends(require_admin)],
+)
+def admin_orders(
+    orders: OrderRepository = Depends(get_order_repository),
+) -> list[Order]:
+    """Recent orders, most recent first."""
+    return sorted(orders.list_orders(), key=lambda o: o.created_at, reverse=True)
 
 
 @app.post("/chat", response_model=ChatOut, tags=["chat"])
