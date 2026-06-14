@@ -1,17 +1,30 @@
 """Computer Shop API entry point."""
 
 import logging
+import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent_client import invoke_support_agent
 from app.config import Settings, get_settings
-from app.models import CategoryOut, ChatOut, ChatRequest, ProductOut
+from app.models import (
+    CategoryOut,
+    ChatOut,
+    ChatRequest,
+    Order,
+    OrderCreate,
+    OrderLineItem,
+    ProductOut,
+)
 from app.repository import (
     CategoryRepository,
+    OrderRepository,
     ProductRepository,
     get_category_repository,
+    get_order_repository,
     get_product_repository,
 )
 
@@ -67,6 +80,52 @@ def get_product(
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return ProductOut.from_product(product, settings.cdn_base_url)
+
+
+@app.post("/orders", response_model=Order, tags=["orders"])
+def create_order(
+    request: OrderCreate,
+    repo: ProductRepository = Depends(get_product_repository),
+    orders: OrderRepository = Depends(get_order_repository),
+) -> Order:
+    """Place an order. Prices, names, and categories are taken from the catalog
+    server-side, so the client only chooses products and quantities, never the
+    amount charged. `username` is the frontend's best-effort label (see
+    OrderCreate); this route is public, so it is not an authorization fact.
+    """
+    line_items: list[OrderLineItem] = []
+    total = Decimal("0")
+    currency = "USD"
+    for item in request.items:
+        product = repo.get_product(item.product_id)
+        if product is None:
+            raise HTTPException(
+                status_code=404, detail=f"Product not found: {item.product_id}"
+            )
+        line_total = product.price * item.quantity
+        total += line_total
+        currency = product.currency
+        line_items.append(
+            OrderLineItem(
+                product_id=product.id,
+                name=product.name,
+                category=product.category,
+                unit_price=product.price,
+                quantity=item.quantity,
+                line_total=line_total,
+            )
+        )
+
+    order = Order(
+        id=f"ord_{uuid.uuid4().hex[:12]}",
+        username=request.username,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        currency=currency,
+        total=total,
+        items=line_items,
+    )
+    orders.add_order(order)
+    return order
 
 
 @app.post("/chat", response_model=ChatOut, tags=["chat"])
