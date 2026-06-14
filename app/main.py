@@ -33,7 +33,7 @@ from app.repository import (
 
 app = FastAPI(
     title="Computer Shop API",
-    version="0.5.0",
+    version="0.6.0",
 )
 
 app.add_middleware(
