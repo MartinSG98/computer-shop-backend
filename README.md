@@ -6,10 +6,11 @@ DynamoDB as the data store.
 
 ## Status
 
-v0.5 — assortment API with categories, CORS for a browser frontend, and a chat
-route that proxies to the support agent on Bedrock AgentCore. Runs locally with
-zero setup, deploys to AWS Lambda behind API Gateway, reads from DynamoDB when
-configured, and serves product images via S3 + CloudFront.
+v0.6 — assortment API with categories, order capture + checkout, a Cognito-gated
+admin sales dashboard, CORS for a browser frontend, and a chat route that proxies
+to the support agent on Bedrock AgentCore. Runs locally with zero setup, deploys
+to AWS Lambda behind API Gateway, reads from DynamoDB when configured, and serves
+product images via S3 + CloudFront.
 
 ## Data store
 
@@ -20,14 +21,16 @@ The repository implementation is chosen at runtime from the environment:
 | _(none)_ | In-memory seed data. Zero setup — just run. |
 | `PRODUCTS_TABLE` | Use DynamoDB for products; value is the table name. |
 | `CATEGORIES_TABLE` | Use DynamoDB for categories; value is the table name. |
+| `ORDERS_TABLE` | Use DynamoDB for orders; value is the table name. |
 | `AWS_REGION` | AWS region (set automatically on Lambda). |
 | `DYNAMODB_ENDPOINT_URL` | Optional override, e.g. DynamoDB Local. |
 | `CDN_BASE_URL` | CloudFront base URL for images (see below). |
 | `CORS_ALLOW_ORIGINS` | Comma-separated allowed origins (see below). |
 | `AGENT_RUNTIME_ARN` | AgentCore runtime for `/chat`; unset disables the route (503). |
 
-Products and categories are independent: set both env vars for a fully
-DynamoDB-backed app, or neither to run entirely on in-memory seed data.
+Each table is independent: set `PRODUCTS_TABLE`, `CATEGORIES_TABLE`, and
+`ORDERS_TABLE` for a fully DynamoDB-backed app, or leave them unset to run
+entirely on in-memory data (orders then live only for the process lifetime).
 
 Seed real tables (creates them if missing):
 
@@ -89,6 +92,49 @@ Filter products with `GET /products?category=<slug>`:
 Filtering is currently done in-app. The scaling path, once the catalog is large,
 is a DynamoDB GSI on `category` so it becomes an indexed query instead of a scan.
 
+## Orders and checkout
+
+`POST /orders` records an order. The client sends only product ids and
+quantities; the server looks up each product in the catalog and sets the price,
+name, and category itself, so the amount charged can never be chosen by the
+caller.
+
+```json
+{"username": "user-normal", "items": [{"product_id": "gpu-...", "quantity": 1}]}
+→ {"id": "ord_...", "total": "599.99", "currency": "USD", "items": [...], "created_at": "..."}
+```
+
+- Line items **snapshot** the name, category, and unit price at purchase time, so
+  historical orders and the sales metrics stay correct when the catalog is later
+  re-priced or re-categorised.
+- Money is computed and stored as `Decimal` (serialized as a string in JSON), so
+  it never round-trips through float. Orders persist to DynamoDB when
+  `ORDERS_TABLE` is set, otherwise to the in-memory store.
+- Checkout is a **public** route. `username` is a best-effort label the frontend
+  sends from its signed-in context; it is not server-verified, so it is not an
+  authorization fact. Validation: empty carts and zero / over-100 quantities are
+  rejected (422), and an unknown product id returns 404.
+
+## Admin dashboard (Cognito)
+
+The `/admin/*` routes are gated by Cognito. At the edge, API Gateway runs a
+**JWT authorizer** on those routes only, so an unauthenticated caller never
+reaches the Lambda while the public catalog stays open. The bearer must be the
+Cognito **ID token**, since that carries both the `aud` claim the authorizer
+checks and the `cognito:groups` claim the app reads.
+
+A valid token only proves the caller is authenticated, not that they are an
+admin. So `require_admin` (in `app/auth.py`) does the authorization step: it
+reads `cognito:groups` from the authorizer claims and requires the **`admins`**
+group, returning 403 otherwise. With no gateway event present (local dev, tests)
+it is a no-op, matching the repository's "in-memory when nothing is configured"
+behaviour.
+
+- `GET /admin/overview` — dashboard metrics (KPIs, sales over time, top products,
+  sales by category), computed in a single pass over one scan of the orders
+  table. No secondary index, to stay within the free tier.
+- `GET /admin/orders` — recent orders, most recent first.
+
 ## Support agent chat
 
 `POST /chat` proxies one customer message to the support agent (a Strands + Nova
@@ -131,6 +177,9 @@ CORS_ALLOW_ORIGINS=https://shop.example.com
 - `GET /products?category=<slug>` — assortment filtered to a category (404 if unknown)
 - `GET /products/{product_id}` — single product (404 if unknown)
 - `GET /categories` — category taxonomy, sorted by `sort_order`
+- `POST /orders` — place an order (public; prices resolved server-side)
+- `GET /admin/overview` — sales dashboard metrics (admins only)
+- `GET /admin/orders` — recent orders, newest first (admins only)
 - `POST /chat` — one message to the support agent (503 when not configured)
 
 ## Requirements

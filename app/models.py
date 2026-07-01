@@ -123,6 +123,95 @@ class CategoryOut(CategoryBase):
         )
 
 
+class OrderItemIn(BaseModel):
+    """One requested checkout line: a product and how many. The price, name, and
+    category are resolved server-side from the catalog, never trusted from the
+    client."""
+
+    product_id: str
+    quantity: int = Field(ge=1, le=100)
+
+
+class OrderCreate(BaseModel):
+    """Checkout request body.
+
+    `username` is supplied by the frontend from its signed-in context. It is not
+    server-verified (checkout is a public route), so treat it as a best-effort
+    label, not an authorization fact.
+    """
+
+    items: list[OrderItemIn] = Field(min_length=1, max_length=50)
+    username: str | None = None
+
+
+class OrderLineItem(BaseModel):
+    """A line within a stored order. Name, category, and price are snapshotted at
+    purchase time so historical orders and the sales metrics don't shift when the
+    catalog is later re-priced or re-categorised."""
+
+    product_id: str
+    name: str
+    category: str
+    unit_price: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
+    quantity: int = Field(ge=1)
+    line_total: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
+
+
+class Order(BaseModel):
+    """Stored representation (the DynamoDB item shape) and the API response shape;
+    an order has no client-hidden fields, so one model serves both."""
+
+    id: str
+    username: str | None = None
+    created_at: str  # ISO 8601, UTC
+    currency: str = "USD"
+    total: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
+    items: list[OrderLineItem]
+
+
+class SalesSummary(BaseModel):
+    """Headline KPIs for the admin dashboard."""
+
+    order_count: int
+    total_revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    average_order_value: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    units_sold: int
+
+
+class SalesByDay(BaseModel):
+    """One point on the sales-over-time series."""
+
+    date: str  # YYYY-MM-DD
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+    orders: int
+
+
+class TopProduct(BaseModel):
+    """A product ranked by units sold (revenue breaks ties)."""
+
+    product_id: str
+    name: str
+    units: int
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+
+
+class SalesByCategory(BaseModel):
+    """Aggregated sales for one category."""
+
+    category: str
+    units: int
+    revenue: Decimal = Field(ge=0, max_digits=16, decimal_places=2)
+
+
+class AdminOverview(BaseModel):
+    """Everything the admin dashboard needs, from a single scan of the orders."""
+
+    summary: SalesSummary
+    sales_over_time: list[SalesByDay]
+    top_products: list[TopProduct]
+    sales_by_category: list[SalesByCategory]
+
+
 class ChatRequest(BaseModel):
     """One customer message to the support agent.
 

@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from functools import lru_cache
 
 from app.config import get_settings
-from app.models import Category, Product
+from app.models import Category, Order, Product
 from app.seed_data import SEED_CATEGORIES, SEED_PRODUCTS
 
 
@@ -149,3 +149,71 @@ def get_category_repository() -> CategoryRepository:
             endpoint_url=settings.dynamodb_endpoint_url,
         )
     return InMemoryCategoryRepository()
+
+
+class OrderRepository(ABC):
+    @abstractmethod
+    def add_order(self, order: Order) -> None:
+        ...
+
+    @abstractmethod
+    def list_orders(self) -> list[Order]:
+        ...
+
+
+class InMemoryOrderRepository(OrderRepository):
+    def __init__(self, orders: list[Order] | None = None) -> None:
+        self._orders: dict[str, Order] = {o.id: o for o in (orders or [])}
+
+    def add_order(self, order: Order) -> None:
+        self._orders[order.id] = order
+
+    def list_orders(self) -> list[Order]:
+        return list(self._orders.values())
+
+
+class DynamoDBOrderRepository(OrderRepository):
+    def __init__(
+        self,
+        table_name: str,
+        *,
+        region_name: str | None = None,
+        endpoint_url: str | None = None,
+    ) -> None:
+        # Imported lazily so the in-memory path never pays the boto3 import cost.
+        import boto3
+
+        resource = boto3.resource(
+            "dynamodb", region_name=region_name, endpoint_url=endpoint_url
+        )
+        self._table = resource.Table(table_name)
+
+    def add_order(self, order: Order) -> None:
+        # model_dump keeps Decimals as Decimal (DynamoDB rejects float), so the
+        # money fields store cleanly without a float round-trip.
+        self._table.put_item(Item=order.model_dump())
+
+    def list_orders(self) -> list[Order]:
+        items: list[dict] = []
+        kwargs: dict = {}
+        while True:
+            response = self._table.scan(**kwargs)
+            items.extend(response.get("Items", []))
+            last_key = response.get("LastEvaluatedKey")
+            if not last_key:
+                break
+            kwargs["ExclusiveStartKey"] = last_key
+        return [Order(**item) for item in items]
+
+
+@lru_cache
+def get_order_repository() -> OrderRepository:
+    """Return the repository implementation. Cached so it's a singleton."""
+    settings = get_settings()
+    if settings.orders_table:
+        return DynamoDBOrderRepository(
+            settings.orders_table,
+            region_name=settings.aws_region,
+            endpoint_url=settings.dynamodb_endpoint_url,
+        )
+    return InMemoryOrderRepository()
