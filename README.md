@@ -1,5 +1,7 @@
 # Computer Shop API
 
+![CI](https://github.com/MartinSG98/computer-shop-backend/actions/workflows/ci.yml/badge.svg)
+
 Backend for the Computer Shop app. A FastAPI service that runs locally with zero
 external setup and is designed to deploy to AWS Lambda behind API Gateway, with
 DynamoDB as the data store.
