@@ -1,6 +1,9 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v"
+# Put the repo root on sys.path so `app` imports under a bare `pytest`
+# invocation too (python -m pytest gets this for free from the cwd).
+pythonpath = ["."]
 filterwarnings = [
     # Starlette's TestClient deprecating httpx for httpx2 — third-party, not our code.
     "ignore::starlette.exceptions.StarletteDeprecationWarning",
